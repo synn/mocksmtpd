@@ -10,7 +10,18 @@
 <h1 id="subject"><%=h mail[:subject] %></h1>
 <div><p id="date" style="font-size:0.8em;"><%= mail[:date].to_s %></div>
 <div id="source" style="border: solid 1px #666; background:white; padding:2em;">
-<p><%= mail[:source] %></p>
+
+<dl id="headers">
+  <% mail[:headers].each do |name, value| %>
+    <dt><%= name %></dt>
+    <dd><%= value %></dd>
+  <% end %>
+</dl>
+
+<div id="body">
+	<%= mail[:body] %>
+</div>
+
 </div>
 </body>
 </html>

@@ -244,14 +244,59 @@ class Mocksmtpd
     save_index(mail)
   end
 
-  def parse_mail(src, sender, recipients)
-    src = NKF.nkf("-wm", src)
-    subject = src.match(/^Subject:\s*(.+)/i).to_a[1].to_s.strip
-    date = src.match(/^Date:\s*(.+)/i).to_a[1].to_s.strip
+  def split_to_headers_and_body(src)
+    headers = ""
+    body = ""
+    target = headers
+    src.each_line do |line|
+      #line.chomp!
+      if line.chomp == ""
+        target = body
+        next
+      end
+      target << line
+    end
+    [headers, body]
+  end
 
-    src = ERB::Util.h(src)
-    src = src.gsub(%r{https?://[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+},'<a href="\0">\0</a>')
-    src = src.gsub(/(?:\r\n|\r|\n)/, "<br />\n")
+  def parse_header(header_src)
+    header_src = NKF.nkf("-wm", header_src)
+    headers = {}
+    header_src.each_line do |line|
+      line.chomp =~ /^(.*?)\:\s*(.*)$/
+      headers[$1] = $2
+    end
+    headers
+  end
+
+  def parse_body(headers, body_src)
+    if headers["Content-Transfer-Encoding"].downcase == "base64"
+      body_src = body_src.unpack('m')[0]
+    end
+    coding = headers["Content-Type"] =~ /.*charset=(.*)$/ ? $1 : nil
+    if coding
+      body_src = body_src.force_encoding(coding)
+    end
+    lines = []
+    body_src.each_line do |line|
+      line = line.gsub(%r{https?://[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+},'<a href="\0">\0</a>')
+      lines << line
+    end
+    lines.join('<br/>');
+  end
+
+  def parse_src(src)
+    header_part, body_part = split_to_headers_and_body(src)
+    headers = parse_header(header_part)
+    body = parse_body(headers, body_part)
+
+    [headers, body]
+  end
+
+  def parse_mail(src, sender, recipients)
+    headers, body = parse_src(src)
+    subject = headers["Subject"]
+    date = headers["Date"]
   
     if date.empty?
       date = Time.now
@@ -260,7 +305,8 @@ class Mocksmtpd
     end
   
     mail = {
-      :source => src,
+      :headers => headers,
+      :body => body,
       :sender => sender,
       :recipients => recipients,
       :subject => subject,
