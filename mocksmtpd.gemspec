@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{mocksmtpd}
   s.rubygems_version = %q{1.2.0}
+  s.add_dependency('mail')
   s.summary = %q{Mock SMTP server for development/testing.}
   s.test_files = ["test/mocksmtpd_test.rb"]
 

@@ -6,6 +6,7 @@ require 'yaml'
 require 'erb'
 require 'nkf'
 require 'smtpserver'
+require 'mail'
 
 class Mocksmtpd
   VERSION = '0.0.3'
@@ -262,10 +263,7 @@ class Mocksmtpd
   def parse_header(header_src)
     header_src = NKF.nkf("-wm", header_src)
     headers = {}
-    header_src.each_line do |line|
-      line.chomp =~ /^(.*?)\:\s*(.*)$/
-      headers[$1] = $2
-    end
+    Mail::Header.new(header_src).fields.each{|e| headers[e.field.name] = e.to_s}
     headers
   end
 
