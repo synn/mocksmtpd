@@ -60,23 +60,23 @@ class SMTPD
     catch(:close) do
       puts_safe "220 #{@domain} service ready"
       while comm = @sock.gets_safe do
-  catch :next_comm do
-    comm.sub!(/\r?\n/, '')
-    comm, arg = comm.split(/\s+/,2)
+        catch :next_comm do
+          comm.sub!(/\r?\n/, '')
+          comm, arg = comm.split(/\s+/,2)
           break if comm == nil
-    case comm.upcase
-    when 'EHLO' then comm_helo arg
-    when 'HELO' then comm_helo arg
-    when 'MAIL' then comm_mail arg
-    when 'RCPT' then comm_rcpt arg
-    when 'DATA' then comm_data arg
-    when 'RSET' then comm_rset arg
-    when 'NOOP' then comm_noop arg
-    when 'QUIT' then comm_quit arg
-    else
-      error '502 Error: command not implemented'
-    end
-  end
+          case comm.upcase
+          when 'EHLO' then comm_helo arg
+          when 'HELO' then comm_helo arg
+          when 'MAIL' then comm_mail arg
+          when 'RCPT' then comm_rcpt arg
+          when 'DATA' then comm_data arg
+          when 'RSET' then comm_rset arg
+          when 'NOOP' then comm_noop arg
+          when 'QUIT' then comm_quit arg
+          else
+            error '502 Error: command not implemented'
+          end
+        end
       end
     end
   end
@@ -150,22 +150,22 @@ class SMTPD
     loop do
       l = @sock.gets_safe
       if l == nil then
-  raise SMTPD::Error, 'unexpected EOF'
+        raise SMTPD::Error, 'unexpected EOF'
       end
       if l.chomp == '.' then break end
       if l[0] == ?. then
-  l[0,1] = ''
+        l[0,1] = ''
       end
       size += l.size
       if @max_size and @max_size < size then
-  error '552 Error: message too large'
+        error '552 Error: message too large'
       end
       @data_each_line.call(l) if @data_each_line
       tmpf << l if @data_hook
     end
     if @data_hook then
       if @use_file then
-  tmpf.pos = 0
+        tmpf.pos = 0
         @data_hook.call(tmpf, @sender, @recipients)
         tmpf.close(true)
       else

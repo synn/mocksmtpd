@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency('mail')
   s.summary = %q{Mock SMTP server for development/testing.}
   s.test_files = ["test/mocksmtpd_test.rb"]
+  s.dependency "baby_erubis", "2.1.2"
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION

@@ -3,7 +3,7 @@ $:.unshift File.dirname(__FILE__) # for test/development
 require 'optparse'
 require 'pathname'
 require 'yaml'
-require 'erb'
+require 'baby_erubis'
 require 'nkf'
 require 'smtpserver'
 require 'mail'
@@ -97,8 +97,7 @@ class Mocksmtpd
 
   def template(name)
     path = TEMPLATE_DIR + "#{name}.erb"
-    src = path.read
-    return ERB.new(src, nil, "%-")
+    return BabyErubis::Html.new.from_file(path.to_s, 'utf-8')
   end
 
   def init
@@ -326,7 +325,7 @@ class Mocksmtpd
 
   def save_mail(mail)
     open(mail[:path], "w") do |io|
-      io << @templates[:mail].result(binding)
+      io << @templates[:mail].render(mail)
     end
     @logger.debug("mail saved: #{mail[:path]}")
   end
@@ -335,12 +334,12 @@ class Mocksmtpd
     path = @inbox + "index.html"
     unless File.exist?(path)
       open(path, "w") do |io|
-        io << @templates[:index].result(binding)
+        io << @templates[:index].render(mail)
       end
     end
 
-    htmlsrc = File.read(path)
-    add = @templates[:index_entry].result(binding)
+    htmlsrc = File.read(path, encoding = "UTF-8")
+    add = @templates[:index_entry].render(mail)
 
     htmlsrc.sub!(/<!-- ADD -->/, add)
     open(path, "w") do |io|
