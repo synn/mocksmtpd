@@ -110,7 +110,7 @@ class Mocksmtpd
     puts "Created: #{path + 'log'}/"
 
     open(path + "mocksmtpd.conf", "w") do |io|
-      io << template("mocksmtpd.conf").result(binding)
+      io << template("mocksmtpd.conf").render()
     end
     puts "Created: #{path + 'mocksmtpd.conf'}"
   end
