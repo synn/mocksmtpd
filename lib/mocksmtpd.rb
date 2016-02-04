@@ -325,7 +325,7 @@ class Mocksmtpd
 
   def save_mail(mail)
     open(mail[:path], "w") do |io|
-      io << @templates[:mail].render(mail)
+      io << @templates[:mail].render({ :mail=>mail })
     end
     @logger.debug("mail saved: #{mail[:path]}")
   end
@@ -334,12 +334,12 @@ class Mocksmtpd
     path = @inbox + "index.html"
     unless File.exist?(path)
       open(path, "w") do |io|
-        io << @templates[:index].render(mail)
+        io << @templates[:index].render({ :mail=>mail })
       end
     end
 
     htmlsrc = File.read(path, encoding = "UTF-8")
-    add = @templates[:index_entry].render(mail)
+    add = @templates[:index_entry].render({ :mail=>mail })
 
     htmlsrc.sub!(/<!-- ADD -->/, add)
     open(path, "w") do |io|
