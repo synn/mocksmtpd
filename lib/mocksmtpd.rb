@@ -268,7 +268,7 @@ class Mocksmtpd
   end
 
   def parse_body(headers, body_src)
-    if headers["Content-Transfer-Encoding"].downcase == "base64"
+    if headers["Content-Transfer-Encoding"] != nil && headers["Content-Transfer-Encoding"].downcase == "base64"
       body_src = body_src.unpack('m')[0]
     end
     coding = headers["Content-Type"] =~ /.*charset=(.*)$/ ? $1 : nil
