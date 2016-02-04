@@ -338,7 +338,7 @@ class Mocksmtpd
       end
     end
 
-    htmlsrc = File.read(path, encoding = "UTF-8")
+    htmlsrc = File.read(path, encoding: "UTF-8")
     add = @templates[:index_entry].render({ :mail=>mail })
 
     htmlsrc.sub!(/<!-- ADD -->/, add)
